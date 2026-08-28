@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktiv Historie med Kamp</title>
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #spill-beholder {
+            max-width: 600px;
+            width: 100%;
+            background-color: #161b22;
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        #historie-tekst {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            white-space: pre-line;
+        }
+        #valg-beholder {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        button, input {
+            background-color: #21262d;
+            color: #58a6ff;
+            border: 1px solid #30363d;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-family: inherit;
+            text-align: left;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #30363d;
+            color: #79c0ff;
+            border-color: #8b949e;
+        }
+        .start-paa-nytt-knapp {
+            color: #ff7b72;
+            border-color: rgba(248, 81, 73, 0.4);
+            margin-top: 20px;
+        }
+        .start-paa-nytt-knapp:hover {
+            background-color: rgba(248, 81, 73, 0.1);
+            color: #ff7b72;
+        }
+    </style>
+</head>
+<body>
+    <div id="spill-beholder">
+        <div id="historie-tekst">Laster historien...</div>
+        <div id="valg-beholder"></div>
+    </div>
+
+    <script>
+        // --- 1. RPG STATS & VARIABLES ---
+        let fightTime = 5; 
+        let regularFightLength = 5; 
+        let bossFightLength = 10; 
+        let bossFightTime = 10; 
+        
+        let allyDeathCounter = 0; 
+        let trueAllyDeathCounter = 0; 
+        let neutralDeathCounter = 0; 
+        let bossDeathCounter = 0; 
+
+        let unreliable = null;
+
+        let playerCombatLife = 2; 
+        let bossCombatLife = 5; 
+
+        const actionMap = {
+            "blessing": onBlessed,
+            "curse": onCursed,
+            "ally_killed": onAllyKilled,
+            "true_ally_killed": onTrueAllyKilled,
+            "neutral_killed": onNeutralKilled,
+            "boss_killed": onBossKilled
+        };
+
+        // --- 2. CHARACTER LIST SETUP ---
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        const list = chars.split('');
+
+        function getRandomItems(arr, count) {
+            const shuffled = [...arr].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
+        }
+
+        // --- 3. STORY NODES ---
+        const historieNoder = {
+            start: {
+                tekst: "You're trapped in a dark room. You look around and realize that you are trapped in a dungeon. To your left, you see a statue of a goddess, whilst right in front of you, there is a long, dark hallway.\n\nWhat do you do?",
+                valg: [
+                    { tekst: "Pray to the statue of the goddess", nesteNode: "blessing" },
+                    { tekst: "Break the statue of the goddess", nesteNode: "curse" },
+                    { tekst: "Go explore the dark hallway", nesteNode: "hallway" }
+                ]
+            },
+            blessing: {
+                tekst: "You kneel down in front of the statue, and clasp your hands together in prayer. The statue glows with a warm light, and you feel a sense of peace wash over you. You have been blessed by the goddess.",
+                valg: [
+                    { tekst: "Proceed to the hallway", nesteNode: "hallway" }
+                ]
+            },
+            curse: {
+                tekst: "You draw your sword and smash the statue of the goddess. The statue shatters into pieces, as you feel a cold chill run down your spine. You have been cursed by the goddess.",
+                valg: [
+                    { tekst: "Proceed to the hallway", nesteNode: "hallway" }
+                ]
+            },
+            hallway: {
+                tekst: "You walk down the dark hallway, and after a few minutes, you come across a locked door. You can hear the sound of something moving on the other side. What do you do?",
+                valg: [
+                    { tekst: "Enter the room. What's the worst that can happen?", nesteNode: "werewolf_encounter" },
+                    { tekst: "Swiftly walk past.", nesteNode: "start" }
+                ]
+            },
+            werewolf_encounter: {
+                tekst: "You enter the room and see the silhouette of a figure, standing in the shadows. Before you can decide on what to do, the dark figure turns around, revealing it to be a fierce werewolf. It lunges at you with sharp claws.",
+                valg: [
+                    { tekst: "Fight the werewolf", nesteNode: "fight_werewolf" },
+                    { tekst: "Run away", nesteNode: "run_from_werewolf" }
+                ]
+            },
+            fight_werewolf: {
+                tekst: "You pick up a nearby sword just in time to parry the monster's attack. It pushes you back, slamming you against the wall. It lunges at you again. You have to act fast.",
+                erKamp: true, // Triggers typing combat automatically
+                valg: []
+            },
+            run_from_werewolf: {
+                tekst: "You turn and run as fast as you can. You can hear the werewolf's snarls echoing behind you. Right as it's about to catch you, a mysterious figure appears and saves you.",
+                valg: [
+                    { tekst: "Ask who they are", nesteNode: "saved_by_x",  },
+                    { tekst: "Run away", nesteNode: "run_from_x",  }
+                ]
+            },
+            run_from_x: {
+                tekst: "As youre about  to run away, when the figure takes off it's hood, and claims to be friednly. They put down their weapon, and introduce themselves as an adventure named x.",
+                valg: [
+                    { tekst: "Ask who they are", nesteNode: "saved_by_x",  },
+                    { tekst: "Run away", nesteNode: "saved_by_x",  }
+                ]
+            },
+        };
+        
+
+        // --- 4. STAT-CHANGING FUNCTIONS ---
+        function onAllyKilled() {
+            fightTime = fightTime * 0.95;
+            allyDeathCounter++;
+            console.log(`A despicable act. Fight time reduced by 5%. New time: ${fightTime.toFixed(1)}s`);
+        }  
+
+        function onTrueAllyKilled() {
+            fightTime = fightTime * 0.8;
+            trueAllyDeathCounter++;
+            console.log(`A grave sin. Fight time reduced by 20%. New time: ${fightTime.toFixed(1)}s`);
+        }  
+
+        function onBossKilled() {
+            fightTime = fightTime * 1.2;
+            bossDeathCounter++;
+            console.log(`A heroic deed. Fight time increased by 20%. New time: ${fightTime.toFixed(1)}s`);
+        }  
+
+        function onNeutralKilled() {
+            neutralDeathCounter++;
+            console.log(`An act unprovoked. Neutral deaths: ${neutralDeathCounter}`);
+        }  
+
+        function onCursed() {
+            playerCombatLife--;
+            console.log('A curse upon thee... Player life decreased. New count: ' + playerCombatLife);
+        }
+
+        function onBlessed() {
+            playerCombatLife++;
+            console.log('A blessing upon thee... Player life increased. New count: ' + playerCombatLife);
+        }
+
+        function onPlayerDeath() {
+            console.log('The player has died. Game over.');
+            document.getElementById("historie-tekst").innerText = "You have perished in battle. Game over.";
+            document.getElementById("valg-beholder").innerHTML = `<button class="start-paa-nytt-knapp" onclick="location.reload()">Start på nytt</button>`;
+        }
+
+        function onPlayerWin() {
+            console.log('The player has won the combat encounter!');
+            document.getElementById("historie-tekst").innerText = "You have triumphed over the werewolf!";
+            document.getElementById("valg-beholder").innerHTML = `<button onclick="visNode('start')">Continue Adventure</button>`;
+        }
+
+        function onLifeLost() {
+            playerCombatLife--;
+            console.log(`Player lost a life. Remaining lives: ${playerCombatLife}`);
+            if (playerCombatLife <= 0) {
+                onPlayerDeath();
+            } else {
+                document.getElementById("historie-tekst").innerText = `You failed to type in time and took damage! Lives remaining: ${playerCombatLife}`;
+                document.getElementById("valg-beholder").innerHTML = `<button onclick="visNode('fight_werewolf')">Prøv kampen igjen</button>`;
+            }
+        }
+
+        // --- 5. COMBAT SYSTEM ---
+        // Keep track of the interval so we can stop it if the player wins early
+let combatInterval = null;
+
+function startCombat(length, onWin, onLose) {
+    let targetText = getRandomItems(list, length).join('');
+    let timeLeft = fightTime; // Local timer tracker
+
+    // 1. Render the text, using a specific <span id="timer-display"> so we can update just the number
+    document.getElementById("historie-tekst").innerHTML = `
+        <h2>Combat Encounter!</h2>
+        <p>Type the following text to win the fight: <strong style="font-size: 1.5rem; color: #58a6ff;">${targetText}</strong><br>
+        You have <span id="timer-display">${timeLeft.toFixed(1)}</span> seconds left!</p>
+    `;
+
+    document.getElementById("valg-beholder").innerHTML = `
+        <input type="text" autofocus autocomplete="off" id="combat-input" placeholder="Type here..."
+        style="width: 100%; padding: 10px; font-size: 1rem; border-radius: 5px; border: 1px solid #30363d; box-sizing: border-box;">
+    `;
+
+    const inputField = document.getElementById("combat-input");
+    const timerDisplay = document.getElementById("timer-display");
+
+    // Check player input instantly as they type
+    inputField.addEventListener("input", () => {
+        if (inputField.value === targetText) {
+            clearInterval(combatInterval); // STOP the timer immediately on win!
+            onWin();
+        }
+    });
+
+    // 2. Use setInterval to update the countdown every 100 milliseconds for a smooth decimal display
+    const tickRate = 100; // updates every 0.1 seconds
+    combatInterval = setInterval(() => {
+        timeLeft -= (tickRate / 1000); // subtract 0.1s
+
+        if (timeLeft <= 0) {
+            timeLeft = 0;
+            clearInterval(combatInterval); // Stop the ticker
+            
+            if (!inputField.disabled && inputField.value !== targetText) {
+                inputField.disabled = true;
+                onLose();
+            }
+        }
+
+        // Update the number on the screen live
+        if (timerDisplay) {
+            timerDisplay.innerText = timeLeft.toFixed(1);
+        }
+    }, tickRate);
+}
+        // --- 6. CORE GAME ENGINE ---
+        function visNode(nodeId) {
+            // Apply status changes when entering specific nodes
+            if (nodeId === "blessing") onBlessed();
+            if (nodeId === "curse") onCursed();
+
+            const node = historieNoder[nodeId];
+            document.getElementById("historie-tekst").innerText = node.tekst;
+            
+            const knappBeholder = document.getElementById("valg-beholder");
+            knappBeholder.innerHTML = "";
+            
+            // If the node is marked as combat, launch typing minigame
+            if (node.erKamp) {
+                startCombat(regularFightLength, onPlayerWin, onLifeLost);
+                return;
+            }
+
+            node.valg.forEach(valg => {
+                const knapp = document.createElement("button");
+                knapp.innerText = valg.tekst;
+                
+                if (valg.erStartPaaNytt) {
+                    knapp.classList.add("start-paa-nytt-knapp");
+                }
+                
+                knapp.onclick = () => {
+                // If this choice triggers a function, run it
+                if (valg.handling && actionMap[valg.handling]) {
+                    actionMap[valg.handling]();
+                }
+                visNode(valg.nesteNode);
+            };
+
+                knappBeholder.appendChild(knapp);
+        });
+     }
+
+        // Initialize game
+        visNode("start");
+    </script>
+</body>
+</html>
