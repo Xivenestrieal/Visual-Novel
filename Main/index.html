@@ -146,6 +146,7 @@
             },
             fight_werewolf: {
                 tekst: "You pick up a nearby sword just in time to parry the monster's attack. It pushes you back, slamming you against the wall. It lunges at you again. You have to act fast.",
+                wait: 50000,
                 erKamp: true, // Triggers typing combat automatically
                 valg: []
             },
@@ -159,31 +160,44 @@
             saved_by_x: {
                 tekst: "The hooded figure turns around. Chills run down your spine, as you see a pair of glowing eyes staring back at you. You contemplate running away, when the figure takes off it's hood and lays down its weapon. They introduce themselves as an adventurer named x. Before you can thank them or ask any questions, a loud shriek pierces your ears, as it echoes through the hallway. X draws their weapon, and runs in the direction of ths cry. Youre left all alone in the hallway, with a choice to make.",
                 valg: [
-                    { tekst: "Follow X", nesteNode: "shriek_boss_fight",  },
+                    { tekst: "Follow X", nesteNode: "steel_your_resolve",  },
                     { tekst: "Run away", nesteNode: "werewolf_room",  }
                 ]
             },
             run_from_x: {
                 tekst: "As youre about  to run away, when the figure takes off it's hood, and claims to be friendly. They put down their weapon, and introduce themselves as an adventure named x. But before any additional explanation can be provided, a loud shriek pierces your ears, as it echoes through the hallway. X draws their weapon, and runs in the direction of ths cry. Youre left all alone in the hallway, with a choice to make.",
                 valg: [
-                    { tekst: "Ask who they are", nesteNode: "shriek_boss_fight",  },
+                    { tekst: "Follow X", nesteNode: "steel_your_resolve",  },
                     { tekst: "Run away", nesteNode: "werewolf_room",  }
                 ]
             },
             werewolf_room: {
-                tekst: "As X leaps run away to fight what you can only imagine to be another horror beyond your comprehension, you deicde to take this opportunity to go back to the room you encountered the werewolf. You slowly peek through the door, scared of another encounter. Fortunately, youre all alone",
+                tekst: "As X rushes to fight what you can only imagine to be another horror beyond your comprehension, you deicde to take this opportunity to go back to the room you encountered the werewolf. You slowly peek through the door, scared of another encounter. Fortunately, youre all alone",
                 valg: [
-                    { tekst: "Look Around The Room", nesteNode: "shriek_boss_fight",  },
-                    { tekst: "Go After X", nesteNode: "shriek_boss_fight",  }
+                    { tekst: "Look Around The Room", nesteNode: "",  },
+                    { tekst: "Go After X", nesteNode: "feel_guilty_x",  }
                 ]
             },
             feel_guilty_x: {
-                tekst: "You feel guilty for leaving X to fight alone, and decide to go after them. You run down the hallway, and hear a loud shriek echoing through the walls. You follow the sound, and find X fighting a massive monster. You can see that they are struggling, and you have to act fast.",
+                tekst: "You feel guilty for leaving X to fight alone, and decide to go after them. You run down the hallway, and hear a loud shriek echoing through the walls. You follow the sound, and find yourself standing in front of a huge wooden door. You reach for the handle, as another shriek resonates throughout your entire body. You can feel your hands shaking.",
                 valg: [
-                    { tekst: "Look Around The Room", nesteNode: "shriek_boss_fight",  },
-                    { tekst: "Go After X", nesteNode: "shriek_boss_fight",  }
+                    { tekst: "Steel Your Resolve", nesteNode: "shriek_boss_fight",  },
+                    { tekst: "Run Away", nesteNode: "cowardly_death",  }
                 ]
             },
+            steel_your_resolve: {
+                tekst: "You feel guilty for leaving X to fight alone, and decide to go after them. You run down the hallway, and hear a loud shriek echoing through the walls. You follow the sound, and find yourself standing in front of a huge wooden door. You reach for the handle, as another shriek resonates throughout your entire body. You can feel your hands shaking.",
+                valg: [
+                    { tekst: "Steel Your Resolve", nesteNode: "shriek_boss_fight",  },
+                    { tekst: "Run Away", nesteNode: "cowardly_death",  }
+                ]
+            },
+            shriek_boss_fight: {
+                tekst: "jwand",
+                erKamp: true,
+                valg: []
+            },
+            
         };
         
 
@@ -229,7 +243,7 @@
 
         function onPlayerWin() {
             console.log('The player has won the combat encounter!');
-            document.getElementById("historie-tekst").innerText = "You have triumphed over the werewolf!";
+            document.getElementById("historie-tekst").innerText = "You have triumphed in battle!";
             document.getElementById("valg-beholder").innerHTML = `<button onclick="visNode('start')">Continue Adventure</button>`;
         }
 
