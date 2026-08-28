@@ -157,17 +157,31 @@
                 ]
             },
             saved_by_x: {
-                tekst: "As youre about  to run away, when the figure takes off it's hood, and claims to be friendly. They put down their weapon, and introduce themselves as an adventure named x.",
+                tekst: "The hooded figure turns around. Chills run down your spine, as you see a pair of glowing eyes staring back at you. You contemplate running away, when the figure takes off it's hood and lays down its weapon. They introduce themselves as an adventurer named x. Before you can thank them or ask any questions, a loud shriek pierces your ears, as it echoes through the hallway. X draws their weapon, and runs in the direction of ths cry. Youre left all alone in the hallway, with a choice to make.",
                 valg: [
-                    { tekst: "Ask who they are", nesteNode: "saved_by_x",  },
-                    { tekst: "Run away", nesteNode: "saved_by_x",  }
+                    { tekst: "Follow X", nesteNode: "shriek_boss_fight",  },
+                    { tekst: "Run away", nesteNode: "werewolf_room",  }
                 ]
             },
             run_from_x: {
-                tekst: "As youre about  to run away, when the figure takes off it's hood, and claims to be friendly. They put down their weapon, and introduce themselves as an adventure named x.",
+                tekst: "As youre about  to run away, when the figure takes off it's hood, and claims to be friendly. They put down their weapon, and introduce themselves as an adventure named x. But before any additional explanation can be provided, a loud shriek pierces your ears, as it echoes through the hallway. X draws their weapon, and runs in the direction of ths cry. Youre left all alone in the hallway, with a choice to make.",
                 valg: [
-                    { tekst: "Ask who they are", nesteNode: "saved_by_x",  },
-                    { tekst: "Run away", nesteNode: "saved_by_x",  }
+                    { tekst: "Ask who they are", nesteNode: "shriek_boss_fight",  },
+                    { tekst: "Run away", nesteNode: "werewolf_room",  }
+                ]
+            },
+            werewolf_room: {
+                tekst: "As X leaps run away to fight what you can only imagine to be another horror beyond your comprehension, you deicde to take this opportunity to go back to the room you encountered the werewolf. You slowly peek through the door, scared of another encounter. Fortunately, youre all alone",
+                valg: [
+                    { tekst: "Look Around The Room", nesteNode: "shriek_boss_fight",  },
+                    { tekst: "Go After X", nesteNode: "shriek_boss_fight",  }
+                ]
+            },
+            feel_guilty_x: {
+                tekst: "You feel guilty for leaving X to fight alone, and decide to go after them. You run down the hallway, and hear a loud shriek echoing through the walls. You follow the sound, and find X fighting a massive monster. You can see that they are struggling, and you have to act fast.",
+                valg: [
+                    { tekst: "Look Around The Room", nesteNode: "shriek_boss_fight",  },
+                    { tekst: "Go After X", nesteNode: "shriek_boss_fight",  }
                 ]
             },
         };
