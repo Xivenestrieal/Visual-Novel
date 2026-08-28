@@ -20,7 +20,7 @@
         #spill-beholder {
             max-width: 600px;
             width: 100%;
-            background-color: #baba81;
+            background-color: #696942;
             padding: 30px;
             border-radius: 8px;
             border: 1px solid #30363d;
@@ -38,7 +38,7 @@
             gap: 12px;
         }
         button, input {
-            background-color: #baba81;
+            background-color: #696942;
             color: #deb810;
             border: 1px solid #c0a832;
             padding: 12px 20px;
@@ -52,16 +52,16 @@
             width: 100%;
         }
         button:hover {
-            background-color: #baba81;
-            color: #79c0ff;
+            background-color: #696942;
+            color: #f6ff79;
             border-color: #9d9e8b;
         }
-        .start-paa-nytt-knapp {
+        .try-again-button {
             color: #c7170b;
             border-color: rgba(91, 13, 9, 0.4);
             margin-top: 20px;
         }
-        .start-paa-nytt-knapp:hover {
+        .try-again-button  :hover {
             background-color: rgba(248, 81, 73, 0.1);
             color: #ab1b10;
         }
@@ -134,7 +134,7 @@
                 tekst: "You walk down the dark hallway, and after a few minutes, you come across a locked door. You can hear the sound of something moving on the other side. What do you do?",
                 valg: [
                     { tekst: "Enter the room. What's the worst that can happen?", nesteNode: "werewolf_encounter" },
-                    { tekst: "Swiftly walk past.", nesteNode: "start" }
+                    { tekst: "Swiftly walk past.", nesteNode: "steel_your_resolve" }
                 ]
             },
             werewolf_encounter: {
@@ -186,7 +186,7 @@
                 ]
             },
             steel_your_resolve: {
-                tekst: "You feel guilty for leaving X to fight alone, and decide to go after them. You run down the hallway, and hear a loud shriek echoing through the walls. You follow the sound, and find yourself standing in front of a huge wooden door. You reach for the handle, as another shriek resonates throughout your entire body. You can feel your hands shaking.",
+                tekst: "You walk down the hallway, and hear a loud shriek echoing through the walls. You follow the sound, and find yourself standing in front of a huge wooden door. You reach for the handle, as another shriek resonates throughout your entire body. You can feel your hands shaking.",
                 valg: [
                     { tekst: "Steel Your Resolve", nesteNode: "shriek_boss_fight",  },
                     { tekst: "Run Away", nesteNode: "cowardly_death",  }
@@ -238,7 +238,7 @@
         function onPlayerDeath() {
             console.log('The player has died. Game over.');
             document.getElementById("historie-tekst").innerText = "You have perished in battle. Game over.";
-            document.getElementById("valg-beholder").innerHTML = `<button class="start-paa-nytt-knapp" onclick="location.reload()">Start på nytt</button>`;
+            document.getElementById("valg-beholder").innerHTML = `<button class="try-again-button" onclick="location.reload()">Try Again</button>`;
         }
 
         function onPlayerWin() {
@@ -254,7 +254,7 @@
                 onPlayerDeath();
             } else {
                 document.getElementById("historie-tekst").innerText = `You failed to type in time and took damage! Lives remaining: ${playerCombatLife}`;
-                document.getElementById("valg-beholder").innerHTML = `<button onclick="visNode('fight_werewolf')">Prøv kampen igjen</button>`;
+                document.getElementById("valg-beholder").innerHTML = `<button onclick="visNode('fight_werewolf')">Continue Fighting</button>`;
             }
         }
 
@@ -333,7 +333,7 @@ function startCombat(length, onWin, onLose) {
                 knapp.innerText = valg.tekst;
                 
                 if (valg.erStartPaaNytt) {
-                    knapp.classList.add("start-paa-nytt-knapp");
+                    knapp.classList.add("try-again-button");
                 }
                 
                 knapp.onclick = () => {
